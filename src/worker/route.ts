@@ -2,7 +2,12 @@ import { ENV } from './env';
 import { SWAGGER_DOC } from './setting';
 import { getCorsOptionsHeader } from './share/utils/utils';
 import { OpenAPIRouter } from '@cloudflare/itty-router-openapi';
-import { ChatGptAction, ChatGptCommandsAction } from './controller/ChatGptController';
+import {
+	ChatGptAction,
+	ChatGptBillingSubscriptionAction,
+	ChatGptBillingUsageAction,
+	ChatGptCommandsAction,
+} from './controller/ChatGptController';
 import WaiOpenAPIRoute from './share/cls/WaiOpenAPIRoute';
 
 export async function handleEvent({ request }: { request: Request }) {
@@ -27,6 +32,8 @@ router.all('*', async (request: Request) => {
 });
 
 router.post('/api/v1/chat/completions', ChatGptAction);
-router.get('/commands', ChatGptCommandsAction);
+router.post('/api/v1/dashboard/billing/subscription', ChatGptBillingSubscriptionAction);
+router.post('/api/v1/dashboard/billing/usage', ChatGptBillingUsageAction);
+router.get('/api/commands', ChatGptCommandsAction);
 router.original.get('/', request => Response.redirect(`${request.url}docs`, 302));
 router.all('*', () => new Response('Not Found.', { status: 404 }));

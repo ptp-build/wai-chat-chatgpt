@@ -5,7 +5,7 @@ const DEFAULT_PROTOCOL = 'https';
 const PROTOCOL = DEFAULT_PROTOCOL;
 const BASE_URL = OPENAI_URL;
 
-export async function requestOpenAi(method: string, path: string, body: string, apiKey: string) {
+export async function requestOpenAi(method: string, path: string, body?: string, apiKey?: string) {
 	return fetch(`${PROTOCOL}://${BASE_URL}/${path}`, {
 		headers: {
 			'Content-Type': 'application/json; charset=utf-8',

@@ -1,8 +1,7 @@
-import { Str, Bool, DateOnly, Int } from '@cloudflare/itty-router-openapi';
+import { Str, Bool, Query, Int } from '@cloudflare/itty-router-openapi';
 import WaiOpenAPIRoute from '../share/cls/WaiOpenAPIRoute';
 import { createStream, requestOpenAi } from '../share/functions/openai';
 import { ENV } from '../env';
-import { currentTs1000 } from '../share/utils/utils';
 
 const Message = {
 	role: new Str({
@@ -15,6 +14,12 @@ const Message = {
 	}),
 };
 
+const requestBody1 = {
+	apiKey: new Str({
+		example: '',
+		description: 'openAi api_key',
+	}),
+};
 const requestBody = {
 	apiKey: new Str({
 		example: '',
@@ -65,6 +70,111 @@ const Commands = [
 	},
 ];
 
+function getApiKey(body: Record<string, any>) {
+	let apiKey;
+	if (!body.apiKey) {
+		apiKey = ENV.OPENAI_API_KEY;
+	} else {
+		apiKey = body.apiKey;
+	}
+	delete body['apiKey'];
+	return apiKey;
+}
+function checkTokenIsInvalid(request: Request) {
+	if (ENV.IS_PROD) {
+		const auth = request.headers.get('Authorization');
+		if (!auth) {
+			return WaiOpenAPIRoute.responseError('Authorization required', 400);
+		}
+		if (auth?.indexOf('Bearer ') !== 0) {
+			return WaiOpenAPIRoute.responseError('Authorization invalid', 400);
+		}
+		const token = auth.replace('Bearer ', '');
+		if (ENV.TOKENS.indexOf(token) === -1) {
+			return WaiOpenAPIRoute.responseError('token invalid', 401);
+		}
+	}
+	return false;
+}
+
+export class ChatGptBillingSubscriptionAction extends WaiOpenAPIRoute {
+	static schema = {
+		tags: ['ChatGpt'],
+		requestBody: requestBody1,
+		responses: {
+			'200': {
+				schema: {},
+			},
+		},
+	};
+	async handle(request: Request, data: Record<string, any>) {
+		const res = checkTokenIsInvalid(request);
+		if (res) {
+			return res;
+		}
+
+		const { body } = data;
+		const apiKey = getApiKey(body);
+
+		try {
+			const res = await requestOpenAi(
+				'GET',
+				'dashboard/billing/subscription',
+				undefined,
+				apiKey
+			);
+			return WaiOpenAPIRoute.responseJson(await res.json());
+		} catch (error) {
+			console.error(error);
+			return WaiOpenAPIRoute.responseError('fetch error');
+		}
+	}
+}
+export class ChatGptBillingUsageAction extends WaiOpenAPIRoute {
+	static schema = {
+		tags: ['ChatGpt'],
+		requestBody: requestBody1,
+		parameters: {
+			start_date: Query(Str, {
+				description: 'start_date',
+				example: '2023-04-01',
+			}),
+			end_date: Query(Str, {
+				description: 'end_date',
+				example: '2023-05-01',
+			}),
+		},
+		responses: {
+			'200': {
+				schema: {},
+			},
+		},
+	};
+	async handle(request: Request, data: Record<string, any>) {
+		const res = checkTokenIsInvalid(request);
+
+		if (res) {
+			return res;
+		}
+		const { start_date, end_date } = data;
+		const { body } = data;
+		const apiKey = getApiKey(body);
+
+		try {
+			const res = await requestOpenAi(
+				'GET',
+				'dashboard/billing/usage' + `?start_date=${start_date}&end_date=${end_date}`,
+				undefined,
+				apiKey
+			);
+			return WaiOpenAPIRoute.responseJson(await res.json());
+		} catch (error) {
+			console.error(error);
+			return WaiOpenAPIRoute.responseError('system error');
+		}
+	}
+}
+
 export class ChatGptAction extends WaiOpenAPIRoute {
 	static schema = {
 		tags: ['ChatGpt'],
@@ -76,14 +186,14 @@ export class ChatGptAction extends WaiOpenAPIRoute {
 		},
 	};
 	async handle(request: Request, data: Record<string, any>) {
-		const { body } = data;
-		let apiKey;
-		if (!body.apiKey) {
-			apiKey = ENV.OPENAI_API_KEY;
-		} else {
-			apiKey = body.apiKey;
+		const res = checkTokenIsInvalid(request);
+		if (res) {
+			return res;
 		}
-		delete body['apiKey'];
+
+		const { body } = data;
+		const apiKey = getApiKey(body);
+
 		let systemPrompt = '';
 		if (body['systemPrompt']) {
 			systemPrompt = body['systemPrompt'];
@@ -96,8 +206,18 @@ export class ChatGptAction extends WaiOpenAPIRoute {
 		});
 		try {
 			if (body.stream) {
-				const stream = await createStream(JSON.stringify(body), apiKey);
-				return new Response(stream);
+				try {
+					const stream = await createStream(JSON.stringify(body), apiKey);
+					return new Response(stream);
+				} catch (e) {
+					const res = await requestOpenAi(
+						'POST',
+						'v1/chat/completions',
+						JSON.stringify(body),
+						apiKey
+					);
+					return WaiOpenAPIRoute.responseJson(await res.json());
+				}
 			} else {
 				const res = await requestOpenAi(
 					'POST',
@@ -108,14 +228,8 @@ export class ChatGptAction extends WaiOpenAPIRoute {
 				return WaiOpenAPIRoute.responseJson(await res.json());
 			}
 		} catch (error) {
-			return WaiOpenAPIRoute.responseJson(
-				{
-					error: {
-						message: JSON.stringify(error),
-					},
-				},
-				200
-			);
+			console.error(error);
+			return WaiOpenAPIRoute.responseError('system error');
 		}
 	}
 }
