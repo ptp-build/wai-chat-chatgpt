@@ -1,0 +1,32 @@
+{
+	"name": "wai-chat-chatgpt",
+	"version": "0.0.1",
+	"description": "a chatgpt api use swagger",
+	"main": "index.js",
+	"scripts": {
+		"start": "npm run dev:worker-api",
+		"dev:worker-api": "wrangler dev src/worker/index.ts --port 2237 --local --persist-to=./wrangler-local-state",
+		"deploy:worker": "wrangler publish src/worker/index.ts -c wrangler.prod.toml",
+		"logs:worker": "wrangler tail --format=pretty"
+	},
+	"author": "wai",
+	"license": "GNU 3",
+	"dependencies": {
+		"@cloudflare/itty-router-openapi": "^0.0.10",
+		"eventsource-parser": "^1.0.0",
+		"openai": "^3.2.1",
+		"pettier": "^1.1.0"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^3.0.0",
+		"@jest/console": "^29.2.0",
+		"@types/jest": "^29.1.2",
+		"jest": "^29.2.0",
+		"nodemon": "^2.0.22",
+		"prettier": "^2.8.7",
+		"ts-jest": "^29.0.3",
+		"ts-node": "^10.9.1",
+		"typescript": "^5.0.2",
+		"wrangler": "^2.15.0"
+	}
+}
