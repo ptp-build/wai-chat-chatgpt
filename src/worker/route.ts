@@ -31,9 +31,9 @@ router.all('*', async (request: Request) => {
 	}
 });
 
-router.post('/api/v1/chat/completions', ChatGptAction);
-router.post('/api/v1/dashboard/billing/subscription', ChatGptBillingSubscriptionAction);
-router.post('/api/v1/dashboard/billing/usage', ChatGptBillingUsageAction);
-router.get('/api/commands', ChatGptCommandsAction);
+router.post('/api/chatgpt/v1/chat/completions', ChatGptAction);
+router.post('/api/chatgpt/v1/dashboard/billing/subscription', ChatGptBillingSubscriptionAction);
+router.post('/api/chatgpt/v1/dashboard/billing/usage', ChatGptBillingUsageAction);
+router.get('/api/chatgpt/commands', ChatGptCommandsAction);
 router.original.get('/', request => Response.redirect(`${request.url}docs`, 302));
 router.all('*', () => new Response('Not Found.', { status: 404 }));
