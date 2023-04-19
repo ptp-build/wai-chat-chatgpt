@@ -4,7 +4,7 @@ import { ENV } from '../../env';
 
 //@ts-ignore
 export default class WaiOpenAPIRoute extends OpenAPIRoute {
-	checkTokenIsInvalid(request: Request) {
+	checkIfTokenIsInvalid(request: Request) {
 		if (ENV.IS_PROD) {
 			const auth = request.headers.get('Authorization');
 			if (!auth) {
@@ -14,7 +14,7 @@ export default class WaiOpenAPIRoute extends OpenAPIRoute {
 				return WaiOpenAPIRoute.responseError('Authorization invalid', 400);
 			}
 			const token = auth.replace('Bearer ', '');
-			if (ENV.TOKENS.indexOf(token) === -1) {
+			if (ENV.OPENAI_API_KEY && ENV.TOKENS.indexOf(token) === -1) {
 				return WaiOpenAPIRoute.responseError('token invalid', 401);
 			}
 		}

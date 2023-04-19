@@ -11,7 +11,7 @@ ip = "localhost"
 IS_PROD = true
 # 如果为空，则需要客户端传入apiKey
 OPENAI_API_KEY = ""
-# 如果服务端worker设置了 OPENAI_API_KEY，需要授权客户端，否则api有滥用的风险，token可以在wai机器人中生成,拿到之后，填入下面即可
+# 如果服务端 设置了 OPENAI_API_KEY，需要授权客户端，否则api有滥用的风险，token可以在wai机器人中生成,拿到之后，填入下面即可
 # TOKENS = ["xxxxxxx1","xxxxxxx2"]
 TOKENS = []
 

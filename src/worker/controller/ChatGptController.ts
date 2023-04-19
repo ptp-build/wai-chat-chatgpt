@@ -92,7 +92,7 @@ export class ChatGptBillingSubscriptionAction extends WaiOpenAPIRoute {
 		},
 	};
 	async handle(request: Request, data: Record<string, any>) {
-		const res = this.checkTokenIsInvalid(request);
+		const res = this.checkIfTokenIsInvalid(request);
 		if (res) {
 			return res;
 		}
@@ -135,7 +135,7 @@ export class ChatGptBillingUsageAction extends WaiOpenAPIRoute {
 		},
 	};
 	async handle(request: Request, data: Record<string, any>) {
-		const res = this.checkTokenIsInvalid(request);
+		const res = this.checkIfTokenIsInvalid(request);
 
 		if (res) {
 			return res;
@@ -170,7 +170,7 @@ export class ChatGptAction extends WaiOpenAPIRoute {
 		},
 	};
 	async handle(request: Request, data: Record<string, any>) {
-		const res = this.checkTokenIsInvalid(request);
+		const res = this.checkIfTokenIsInvalid(request);
 		if (res) {
 			return res;
 		}
