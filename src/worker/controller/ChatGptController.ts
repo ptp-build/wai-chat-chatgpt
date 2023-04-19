@@ -236,7 +236,7 @@ export class ChatGptAction extends WaiOpenAPIRoute {
 
 export class ChatGptCommandsAction extends WaiOpenAPIRoute {
 	static schema = {
-		tags: ['ChatGpt'],
+		tags: ['ChatGptBot'],
 		responses: {
 			'200': {
 				schema: {},
