@@ -4,7 +4,7 @@ import { ENV } from '../../env';
 
 //@ts-ignore
 export default class WaiOpenAPIRoute extends OpenAPIRoute {
-	checkIfTokenIsInvalid(request: Request) {
+	async checkIfTokenIsInvalid(request: Request) {
 		if (ENV.IS_PROD) {
 			const auth = request.headers.get('Authorization');
 			if (!auth) {

@@ -217,10 +217,11 @@ export function getCorsOptionsHeader(Access_Control_Allow_Origin: string = '*') 
 	return {
 		'Access-Control-Allow-Origin': Access_Control_Allow_Origin,
 		'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-		'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization, Token, Path',
+		'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization, ApiKey, Token',
 		'Access-Control-Allow-Credentials': 'true',
 	};
 }
+
 export function ResponseJson(
 	result: object,
 	status = 200,
